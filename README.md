@@ -37,32 +37,3 @@ cd snapt-ai
 npm install
 npm start
 
-🌐 Live Demo
-🔗 Try Snapt AI for free
-No registration, no limits, no hidden costs.
-
-📸 Preview
-
-🧑‍💻 Contribute
-We welcome pull requests and improvements!
-
-Fork this repo
-
-Create your branch: git checkout -b feature/new-feature
-
-Commit changes: git commit -m "Add new feature"
-
-Push to GitHub: git push origin feature/new-feature
-
-Submit a PR!
-
-📄 License
-Licensed under the MIT License.
-
-🙌 Acknowledgements
-Tesseract.js
-
-You — the open source community 🫶
-
-☕ Support the Project
-If Snapt AI saves you time, consider buying me a coffee or starring ⭐ the repo!
