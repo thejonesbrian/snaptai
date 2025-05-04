@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snapt AI - Image Text Extractor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'candy-red': '#FF5A5F',
+                        'light-gray': '#F5F5F5'
+                    }
+                }
+            }
+        }
+    </script>
+    <!--<style>
+
+    </style>-->
+
+</head>
+
+<body class="bg-white min-h-screen font-sans flex flex-col">
+    <!-- Header -->
+    <header class="bg-white shadow-sm py-6">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center">
+                <h1 class="text-3xl font-bold text-gray-800">
+                    <span class="text-candy-red">Snapt</span> AI
+                </h1>
+                <button id="help-btn"
+                    class="bg-light-gray hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg transition">
+                    <i class="fas fa-question-circle mr-2"></i>How to use
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-12 flex-grow">
+        <div class="max-w-4xl mx-auto">
+            <!-- Upload Section -->
+            <div class="bg-white rounded-xl shadow-md overflow-hidden mb-8 fade-in">
+                <div class="p-8">
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-6">Upload or Paste Image</h2>
+
+                    <div class="mb-6">
+                        <div id="drop-zone" class="drop-zone rounded-lg p-8 text-center cursor-pointer">
+                            <div id="upload-instructions"
+                                class="upload-instructions flex flex-col items-center justify-center">
+                                <i class="fas fa-cloud-upload-alt text-4xl text-candy-red mb-4"></i>
+                                <p class="text-gray-600 mb-2">Drag & drop your image here</p>
+                                <p class="text-gray-500 text-sm mb-4">or</p>
+                                <label for="file-upload"
+                                    class="bg-candy-red hover:bg-red-500 text-white px-6 py-3 rounded-lg cursor-pointer transition">
+                                    <i class="fas fa-folder-open mr-2"></i>Browse Files
+                                </label>
+                                <input id="file-upload" type="file" accept="image/*" class="hidden">
+                                <p class="text-gray-500 text-sm mt-4">You can also paste an image (Ctrl+V)</p>
+                            </div>
+                            <div id="image-preview-container" class="hidden">
+                                <img id="image-preview" class="image-preview" src="" alt="Preview">
+                                <div class="flex justify-center space-x-4">
+                                    <button id="change-image-btn"
+                                        class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-lg transition">
+                                        <i class="fas fa-sync-alt mr-2"></i>Change Image
+                                    </button>
+                                    <button id="remove-image-btn"
+                                        class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-lg transition">
+                                        <i class="fas fa-trash-alt mr-2"></i>Remove
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Button -->
+                    <div class="text-center mb-8 fade-in" style="animation-delay: 0.1s;">
+                        <button id="translate-btn"
+                            class="bg-candy-red hover:bg-red-500 text-white font-bold py-3 px-8 rounded-full shadow-lg transition transform hover:scale-105">
+                            <i class="fas fa-language mr-2"></i>Extract Text
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Processing Indicator -->
+            <div id="processing-indicator" class="hidden mb-8 fade-in">
+                <div class="bg-white rounded-xl shadow-md overflow-hidden">
+                    <div class="p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Processing Image</h3>
+                        <div class="flex items-center space-x-4">
+                            <div class="flex-shrink-0">
+                                <div class="animate-spin text-candy-red">
+                                    <i class="fas fa-circle-notch text-2xl"></i>
+                                </div>
+                            </div>
+                            <div class="flex-grow">
+                                <div class="progress-bar">
+                                    <div id="progress-bar-fill" class="progress-bar-fill" style="width: 0%"></div>
+                                </div>
+                                <p id="progress-text" class="text-sm text-gray-600 mt-2">Initializing OCR engine...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results Section -->
+            <div id="results-section" class="bg-white rounded-xl shadow-md overflow-hidden hidden fade-in"
+                style="animation-delay: 0.2s;">
+                <div class="p-8">
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-6">Extracted Text</h2>
+                    <div class="relative">
+                        <textarea id="results-text"
+                            class="w-full h-64 p-4 border border-gray-300 rounded-lg bg-light-gray"></textarea>
+                        <button id="copy-btn"
+                            class="absolute top-2 right-2 bg-white hover:bg-gray-100 text-gray-700 px-3 py-1 rounded border border-gray-300 transition">
+                            <i class="fas fa-copy mr-1"></i>Copy
+                        </button>
+                    </div>
+                    <p class="text-sm text-gray-500 mt-2">Edit the text above before copying if needed. Your data is
+                        never saved on our servers.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-100 py-8">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <p class="text-gray-600 text-sm">© 2023 Snapt AI. All rights reserved.</p>
+                    <p class="text-gray-500 text-xs mt-1">Your privacy matters - we don't store your images or extracted
+                        text.</p>
+                </div>
+                <div class="flex space-x-4">
+                    <a href="#" class="footer-social-icon text-gray-600 hover:text-candy-red">
+                        <i class="fab fa-facebook-f text-xl"></i>
+                    </a>
+                    <a href="#" class="footer-social-icon text-gray-600 hover:text-candy-red">
+                        <i class="fab fa-twitter text-xl"></i>
+                    </a>
+                    <a href="#" class="footer-social-icon text-gray-600 hover:text-candy-red">
+                        <i class="fab fa-instagram text-xl"></i>
+                    </a>
+                    <a href="#" class="footer-social-icon text-gray-600 hover:text-candy-red">
+                        <i class="fab fa-tiktok text-xl"></i>
+                    </a>
+                    <a href="#" class="footer-social-icon text-gray-600 hover:text-candy-red">
+                        <i class="fab fa-youtube text-xl"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Help Modal -->
+    <div id="help-modal"
+        class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 invisible opacity-0">
+        <div class="bg-white rounded-xl max-w-md w-full mx-4 p-6 transform transition-all">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-gray-800">How to Use Snapt AI</h3>
+                <button id="close-modal" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="space-y-4 text-gray-700">
+                <div class="flex items-start">
+                    <div
+                        class="bg-candy-red text-white rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 mt-1 mr-3">
+                        1</div>
+                    <p>Upload an image file by clicking "Browse Files" or dragging and dropping into the upload area.
+                    </p>
+                </div>
+                <div class="flex items-start">
+                    <div
+                        class="bg-candy-red text-white rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 mt-1 mr-3">
+                        2</div>
+                    <p>Alternatively, copy an image to your clipboard and paste it anywhere on the page (Ctrl+V).</p>
+                </div>
+                <div class="flex items-start">
+                    <div
+                        class="bg-candy-red text-white rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 mt-1 mr-3">
+                        3</div>
+                    <p>Click the "Extract Text" button to convert text from your image.</p>
+                </div>
+                <div class="flex items-start">
+                    <div
+                        class="bg-candy-red text-white rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 mt-1 mr-3">
+                        4</div>
+                    <p>Edit the extracted text to add or remove any characters as needed.</p>
+                </div>
+                <div class="flex items-start">
+                    <div
+                        class="bg-candy-red text-white rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 mt-1 mr-3">
+                        5</div>
+                    <p>Use the "Copy" button to copy your edited text to clipboard.</p>
+                </div>
+            </div>
+            <div class="mt-6">
+                <p class="text-sm text-gray-500 italic">Privacy Note: We don't store your images or extracted text. All
+                    processing happens in your browser.</p>
+            </div>
+            <div class="mt-6 text-right">
+                <button id="got-it-btn"
+                    class="bg-candy-red hover:bg-red-500 text-white px-4 py-2 rounded-lg transition">
+                    Got it!
+                </button>
+            </div>
+        </div>
+    </div>
+    <!--<script>
+        
+    </script>-->
+
+</body>
+
+</html>

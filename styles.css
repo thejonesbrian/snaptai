@@ -1,0 +1,65 @@
+.drop-zone {
+    border: 2px dashed #ccc;
+    transition: all 0.3s ease;
+}
+
+.drop-zone.active {
+    border-color: #FF5A5F;
+    background-color: rgba(255, 90, 95, 0.05);
+}
+
+.modal {
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.fade-in {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.progress-bar {
+    height: 6px;
+    background-color: #e0e0e0;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background-color: #FF5A5F;
+    transition: width 0.3s ease;
+}
+
+.image-preview {
+    max-height: 300px;
+    object-fit: contain;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+.upload-instructions {
+    transition: all 0.3s ease;
+}
+
+.hidden {
+    display: none;
+}
+
+.footer-social-icon {
+    transition: all 0.2s ease;
+}
+
+.footer-social-icon:hover {
+    transform: translateY(-2px);
+}
